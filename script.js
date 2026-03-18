@@ -325,19 +325,37 @@ const cursor = document.querySelector('.cursor');
 const trail = document.querySelector('.cursor-trail');
 
 let trailX = 0, trailY = 0;
+let rafId;
 
 document.addEventListener('mousemove', (e) => {
     cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
+    cursor.style.top  = e.clientY + 'px';
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(animateTrail);
+    // hover-класс на интерактивных элементах
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const isInteractive = target && (
+        target.matches('a, button, [onclick], input, label, .card, .nav-link, .btn, .s-card') ||
+        target.closest('a, button, [onclick], .card, .nav-link, .btn, .s-card')
+    );
+    cursor.classList.toggle('hover', !!isInteractive);
+    trail.classList.toggle('hover', !!isInteractive);
+});
 
-    trailX += (e.clientX - trailX) * 0.18;
-    trailY += (e.clientY - trailY) * 0.18;
-    trail.style.left = trailX + 'px';
-    trail.style.top = trailY + 'px';
+document.addEventListener('mousedown', () => {
+    cursor.classList.add('clicking');
+    cursor.classList.remove('hover');
+});
+document.addEventListener('mouseup', () => {
+    cursor.classList.remove('clicking');
 });
 
 function animateTrail() {
-    requestAnimationFrame(animateTrail);
+    trailX += (parseFloat(cursor.style.left) - trailX) * 0.14;
+    trailY += (parseFloat(cursor.style.top)  - trailY) * 0.14;
+    trail.style.left = trailX + 'px';
+    trail.style.top  = trailY + 'px';
+    rafId = requestAnimationFrame(animateTrail);
 }
 animateTrail();
 
